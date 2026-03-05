@@ -22,7 +22,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-$w@af*dkx@ba59
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 # Update: Added local and placeholder domain to clear W020
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.herokuapp.com', '.railway.app']
+# Added www.explore.ugc.edu.gh to the list
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.explore.ugc.edu.gh', '.herokuapp.com', '.railway.app']
 
 
 # Application definition
