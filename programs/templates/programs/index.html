@@ -1,0 +1,861 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postgraduate Programmes | University of Gold Coast</title>
+    <link rel="icon" type="image/png" href="{% static '1.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --ugc-gold: #c5a059;
+            --ugc-gold-bright: #ffdb99; /* Brighter gold for illumination */
+            --ugc-dark: #121212; 
+            --card-bg: #1a1a1a;
+            --transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--ugc-dark);
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- LOADER STYLES --- */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--ugc-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.5s ease, visibility 0.5s;
+            padding: 20px; /* Mobile safety padding */
+        }
+
+        .loader-logo {
+            height: 120px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 15px var(--ugc-gold));
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .loader-text {
+            color: var(--ugc-gold);
+            font-size: 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-align: center; /* Centering the text */
+            max-width: 90%; /* Mobile optimization */
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        /* Hide content initially */
+        #main-content {
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        /* --- Updated Logo Header with Centered Name and Gold Color --- */
+        .logo-header {
+            background-color: #1a1a1a; /* Matched to Footer Background */
+            padding: 40px 60px; 
+            display: flex;
+            flex-direction: column; /* Stacked for perfect centering */
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-logo {
+            height: 110px; 
+            width: auto;
+            /* Intense Glowing gold effect for Logo */
+            filter: drop-shadow(0 0 20px rgba(197, 160, 89, 0.8)) drop-shadow(0 0 40px rgba(197, 160, 89, 0.4));
+            transition: var(--transition);
+        }
+
+        .university-name {
+            font-size: 48px; /* Increased size to stand out */
+            font-weight: 900;
+            color: var(--ugc-gold); /* Updated to brand gold */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5); /* Adds depth to make it pop */
+        }
+
+        .header-logo:hover {
+            filter: drop-shadow(0 0 30px rgba(197, 160, 89, 1)) drop-shadow(0 0 60px rgba(197, 160, 89, 0.6));
+            transform: scale(1.08);
+        }
+
+        /* --- Gold Header Strip --- */
+        .top-bar {
+            background-color: var(--ugc-gold);
+            height: auto; 
+            padding: 25px 0;
+            display: flex;
+            flex-direction: column; /* Stacked for perfect centering */
+            align-items: center;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.8);
+            gap: 10px;
+        }
+
+        .top-bar h1 {
+            color: #000;
+            font-size: 42px;
+            font-weight: 900;
+            text-transform: capitalize;
+            letter-spacing: -1px;
+            text-align: center;
+        }
+
+        /* Staff Login Button Styling */
+        .staff-login-btn {
+            text-decoration: none;
+            color: #000;
+            border: 1px solid #000;
+            padding: 5px 15px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .staff-login-btn:hover {
+            background-color: #000;
+            color: var(--ugc-gold);
+        }
+
+        /* --- Content Container --- */
+        .main-container {
+            max-width: 1400px; 
+            margin: 60px auto;
+            padding: 0 30px;
+        }
+
+        .program-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 60px; 
+        }
+
+        /* --- Animated Card Architecture --- */
+        .program-card {
+            display: flex;
+            height: 220px;
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+            position: relative;
+            
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease, border-color 0.5s ease;
+            visibility: hidden;
+        }
+
+        .program-card.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+        }
+
+        /* --- ILLUMINATING HOVER EFFECT --- */
+        .program-card:hover {
+            transform: translateY(-12px) scale(1.03);
+            z-index: 10;
+            box-shadow: 
+                0 0 40px rgba(197, 160, 89, 0.6), 
+                0 0 80px rgba(197, 160, 89, 0.2),
+                inset 0 0 20px rgba(197, 160, 89, 0.3);
+            border-color: var(--ugc-gold-bright);
+        }
+
+        /* Centering logic for the last card if single on row */
+        .last-card {
+            grid-column: 2;
+        }
+
+        /* Left Pane: Text on Gold */
+        .card-info {
+            flex: 1.1;
+            background-color: var(--ugc-gold);
+            padding: 25px 20px;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            transition: background-color 0.5s ease;
+        }
+
+        .program-card:hover .card-info {
+            background-color: var(--ugc-gold-bright); 
+        }
+
+        .card-info h4 {
+            font-size: 14px; 
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .card-info h2 {
+            font-size: 26px; 
+            font-weight: 900;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+
+        /* Right Pane: Image */
+        .card-img {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(20%) brightness(0.8);
+            transition: var(--transition);
+        }
+
+        .program-card:hover .card-img img {
+            filter: grayscale(0%) brightness(1.2);
+            transform: scale(1.1);
+        }
+
+        /* --- Double Button Overlay --- */
+        .card-actions {
+            position: absolute;
+            bottom: -60px; /* Hidden initially */
+            left: 0;
+            width: 100%;
+            display: flex;
+            background-color: #000;
+            transition: var(--transition);
+            z-index: 11;
+            border-top: 2px solid var(--ugc-gold-bright);
+        }
+
+        .program-card:hover .card-actions {
+            bottom: 0; /* Slide up on hover */
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 15px 10px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        /* Apply Now Styling */
+        .btn-apply {
+            background-color: #000;
+            color: var(--ugc-gold-bright);
+            border-right: 1px solid rgba(197, 160, 89, 0.3);
+        }
+
+        .btn-apply:hover {
+            background-color: var(--ugc-gold-bright);
+            color: #000;
+        }
+
+        /* Brochure Styling */
+        .btn-brochure {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .btn-brochure:hover {
+            background-color: #333;
+            color: var(--ugc-gold-bright);
+        }
+
+        /* --- BACK TO TOP BUTTON --- */
+        #backToTop {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--ugc-gold);
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            z-index: 2000;
+            transition: var(--transition);
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        #backToTop:hover {
+            background-color: var(--ugc-gold-bright);
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px var(--ugc-gold);
+        }
+
+        /* --- MODAL STYLES --- */
+        body.modal-open { overflow: hidden; }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999;
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: #1a1a1a; width: 90%; max-width: 500px; padding: 40px;
+            border-radius: 15px; border: 1px solid var(--ugc-gold); position: relative;
+            animation: modalFadeIn 0.4s ease;
+        }
+        
+        /* Apply Modal - Layout for Iframe and Button */
+        .apply-modal-content {
+            max-width: 1000px;
+            height: 85vh;
+            padding: 0; 
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .iframe-container {
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #applyFrame {
+            width: 100%;
+            height: 125%; /* Crop factor */
+            margin-top: -150px; /* Hide remote header */
+            border: none;
+        }
+
+        /* The NEW Button beneath the modal content */
+        .modal-apply-btn {
+            width: 100%;
+            padding: 20px;
+            background: var(--ugc-gold);
+            color: #000;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            border-top: 2px solid var(--ugc-gold-bright);
+            display: block;
+        }
+
+        .modal-apply-btn:hover {
+            background: var(--ugc-gold-bright);
+        }
+
+        @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .close-modal { position: absolute; top: 20px; right: 25px; color: var(--ugc-gold); font-size: 30px; cursor: pointer; z-index: 10001; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; color: var(--ugc-gold-bright); }
+        .form-group input {
+            width: 100%; padding: 12px; background: #222; border: 1px solid #333;
+            color: #fff; border-radius: 5px; font-family: 'Outfit';
+        }
+        .form-group input:focus { outline: none; border-color: var(--ugc-gold); }
+        .submit-btn {
+            width: 100%; padding: 15px; background: var(--ugc-gold); border: none;
+            font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
+        }
+        .submit-btn:hover { background: var(--ugc-gold-bright); transform: translateY(-3px); }
+
+        /* --- NEW TOAST NOTIFICATION STYLE --- */
+        #toast {
+            visibility: hidden;
+            min-width: 300px;
+            background-color: #1a1a1a;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            border: 1px solid var(--ugc-gold);
+            padding: 20px;
+            position: fixed;
+            z-index: 10000;
+            left: 50%;
+            bottom: 50px;
+            transform: translateX(-50%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 50px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 50px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+
+        /* --- FOOTER DESIGN --- */
+        footer {
+            background-color: #1a1a1a; 
+            padding: 80px 30px 40px;
+            border-top: 1px solid rgba(197, 160, 89, 0.2);
+            margin-top: 100px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 40px;
+        }
+
+        .footer-logo-section img {
+            height: 100px; 
+            margin-bottom: 25px;
+            filter: drop-shadow(0 0 10px rgba(197, 160, 89, 0.3));
+        }
+
+        .footer-logo-section p {
+            font-size: 15px;
+            line-height: 1.8;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .footer-logo-section .email {
+            color: var(--ugc-gold);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .footer-column h3 {
+            font-size: 20px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 40px; height: 2px;
+            background-color: var(--ugc-gold);
+        }
+
+        .footer-column ul { list-style: none; }
+        .footer-column ul li { margin-bottom: 15px; }
+        .footer-column ul li a {
+            color: #fff;
+            text-decoration: none;
+            opacity: 0.7;
+            transition: 0.3s;
+            font-size: 15px;
+        }
+
+        .footer-column ul li a:hover {
+            opacity: 1;
+            color: var(--ugc-gold);
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            color: #fff;
+            font-size: 20px;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover { color: var(--ugc-gold); }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 60px auto 0;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+            font-size: 13px;
+            opacity: 0.6;
+        }
+
+        /* Shimmer Effect on Hover */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .card-info::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background-size: 200% 100%;
+            pointer-events: none;
+        }
+
+        .program-card:hover .card-info::after {
+            animation: shimmer 1.2s infinite;
+        }
+
+        /* Responsive Settings */
+        @media (max-width: 1100px) { 
+            .program-grid { grid-template-columns: repeat(2, 1fr); gap: 30px; }
+            .footer-content { grid-template-columns: 1fr 1fr; }
+            .last-card { grid-column: auto; }
+            .top-bar h1 { font-size: 32px; }
+            .logo-header { padding: 20px 30px; }
+            .university-name { font-size: 32px; }
+        }
+        @media (max-width: 700px) { 
+            .program-grid { grid-template-columns: 1fr; gap: 40px; }
+            .footer-content { grid-template-columns: 1fr; gap: 50px; }
+            .program-card { height: 180px; }
+            .top-bar h1 { font-size: 24px; }
+            .university-name { font-size: 24px; }
+            .logo-header { gap: 15px; padding: 15px; }
+            .header-logo { height: 70px; }
+            
+            /* Specific Loader Mobile Update */
+            .loader-text { font-size: 18px; letter-spacing: 2px; }
+            .loader-logo { height: 90px; }
+
+            /* Mimic Desktop Modal View on Phone */
+            .apply-modal-content { width: 95%; height: 85vh; max-width: 1000px; }
+            #applyFrame { margin-top: -150px; height: 125%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <img src="{% static '1.png' %}" alt="Gold Nation Logo" class="loader-logo">
+        <div class="loader-text">Welcome to the Gold Nation</div>
+    </div>
+
+    <div id="main-content">
+        <header class="logo-header">
+            <img src="{% static '1.png' %}" alt="University Logo" class="header-logo">
+            <div class="university-name">University of Gold Coast</div>
+        </header>
+
+        <div class="top-bar">
+            <h1>Postgraduate Programmes</h1>
+            <a href="{% url 'staff_dashboard' %}" class="staff-login-btn">Staff Portal</a>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+        <div id="toast"><i class="fas fa-check-circle" style="color: var(--ugc-gold); margin-right: 10px;"></i> Thank you! Your submission has been recorded.</div>
+
+        <div id="brochureModal" class="modal-overlay">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <form id="brochureForm">
+                    {% csrf_token %}
+                    <h2 id="modalProgramTitle" style="color: var(--ugc-gold); margin-bottom: 20px; font-size: 20px;">Program Name</h2>
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="fullName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile Number *</label>
+                        <input type="tel" id="mobileNumber" placeholder="e.g. +233 24 000 0000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address *</label>
+                        <input type="email" id="email" placeholder="email@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Highest Qualification (Optional)</label>
+                        <input type="text" id="qualification" placeholder="e.g. Bachelor's Degree">
+                    </div>
+                    <button type="submit" class="submit-btn">Proceed (also downloads brochure)</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="applyModal" class="modal-overlay">
+            <div class="modal-content apply-modal-content">
+                <span class="close-modal" onclick="closeApplyModal()">&times;</span>
+                <div class="iframe-container">
+                    <iframe id="applyFrame" src="" frameborder="0"></iframe>
+                </div>
+                <a href="" id="footerApplyBtn" target="_blank" class="modal-apply-btn">Apply Now</a>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <div class="program-grid">
+                {% for p in programs %}
+                <div class="program-card {% if forloop.last and forloop.counter|divisibleby:3 == False and forloop.counter|add:1|divisibleby:3 == False %}last-card{% endif %}">
+                    <div class="card-info">
+                        <h4>{{ p.program_type }}</h4>
+                        <h2>{{ p.title }}</h2>
+                    </div>
+
+                    <div class="card-img">
+                        {% if p.image %}
+                            <img src="{{ p.image.url }}" alt="{{ p.title }}">
+                        {% else %}
+                            <img src="{% static 'images/placeholder.jpg' %}" alt="No image available">
+                        {% endif %}
+                    </div>
+
+                    <div class="card-actions">
+                        <a href="javascript:void(0)" onclick="openApplyModal('{{ p.apply_url }}')" class="action-btn btn-apply">Apply Now</a>
+                        <a href="javascript:void(0)" onclick="openBrochure('{{ p.title|escapejs }}')" class="action-btn btn-brochure">Download Brochure</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button id="backToTop" title="Go to top"><i class="fas fa-chevron-up"></i></button>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-logo-section">
+                    <img src="{% static '1.png' %}" alt="University Logo">
+                    <p>University of Gold Coast,</p>
+                    <p>19 Tumeric Street,</p>
+                    <p>Accra – Ghana.</p>
+                    <p><a href="mailto:admissions@ugc.edu.gh" class="email">admissions@ugc.edu.gh</a></p>
+                    <p>+233 (0) 263 888 555</p>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Explore</h3>
+                    <ul>
+                        <li><a href="#">Browse Programmes</a></li>
+                        <li><a href="#">Funding Your Studies</a></li>
+                        <li><a href="#">Careers & Internships</a></li>
+                        <li><a href="#">News And Media</a></li>
+                    </ul>
+                    <h3 style="margin-top: 40px;">Support</h3>
+                    <ul>
+                        <li><a href="#">Student Guide</a></li>
+                        <li><a href="#">HelpDesk</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Admissions</h3>
+                    <ul>
+                        <li><a href="#">Local Admissions</a></li>
+                        <li><a href="#">International Admissions</a></li>
+                        <li><a href="#">Admission Details</a></li>
+                    </ul>
+                    <h3 style="margin-top: 40px;">Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                All rights reserved | Copyright &copy;2026
+            </div>
+        </footer>
+    </div> 
+
+    <script>
+    // --- BROCHURE MODAL LOGIC ---
+    const brochureModal = document.getElementById("brochureModal");
+    const brochureForm = document.getElementById("brochureForm");
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxLSZCQix5cjukqS3b70aAV9MdnTMYnn4FnFZpSVyUP8gK5Cs9-gh2I4xHnxAiLrKf2/exec';
+
+    function openBrochure(title) {
+        document.getElementById("modalProgramTitle").innerText = title;
+        brochureModal.style.display = "flex";
+        document.body.classList.add('modal-open'); 
+    }
+
+    function closeModal() {
+        brochureModal.style.display = "none";
+        document.body.classList.remove('modal-open'); 
+    }
+
+    // --- APPLY MODAL LOGIC ---
+    function openApplyModal(url) {
+        const applyModal = document.getElementById("applyModal");
+        const applyFrame = document.getElementById("applyFrame");
+        const footerApplyBtn = document.getElementById("footerApplyBtn");
+        
+        applyFrame.src = url; 
+        footerApplyBtn.href = "https://ugc.edu.gh/application-form/"; 
+        
+        applyModal.style.display = "flex";
+        document.body.classList.add('modal-open');
+    }
+
+    function closeApplyModal() {
+        const applyModal = document.getElementById("applyModal");
+        const applyFrame = document.getElementById("applyFrame");
+        applyFrame.src = ""; 
+        applyModal.style.display = "none";
+        document.body.classList.remove('modal-open');
+    }
+
+    function showToast() {
+        const toast = document.getElementById("toast");
+        if (toast) {
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+    }
+
+    window.onclick = (e) => { 
+        if (e.target == brochureModal) closeModal(); 
+        if (e.target == document.getElementById("applyModal")) closeApplyModal();
+    }
+
+    // --- FORM SUBMISSION ---
+    brochureForm.onsubmit = async function(e) {
+        e.preventDefault();
+        const submitBtn = brochureForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerText;
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Sending...";
+
+        const formData = new URLSearchParams();
+        formData.append('fullName', document.getElementById("fullName").value);
+        formData.append('mobileNumber', document.getElementById("mobileNumber").value);
+        formData.append('email', document.getElementById("email").value);
+        formData.append('qualification', document.getElementById("qualification").value || "N/A");
+        formData.append('program', document.getElementById("modalProgramTitle").innerText);
+
+        try {
+            await fetch('/download-brochure/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            });
+
+            await fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                body: formData.toString(),
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            });
+
+            // Ensure your backend serves Main-Brochure-UGC (12)_compressed.pdf at this route
+            window.location.href = '/download-brochure/';
+
+            closeModal();
+            showToast();
+            brochureForm.reset();
+
+        } catch (error) {
+            console.error('Error!', error.message);
+            alert("Submission failed. Please check your internet.");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+        }
+    };
+
+    // --- UI LOGIC ---
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            const content = document.getElementById('main-content');
+            if(loader) {
+                loader.style.opacity = '0';
+                loader.style.visibility = 'hidden';
+            }
+            if(content) content.style.opacity = '1';
+            
+            document.querySelectorAll('.program-card').forEach(el => observer.observe(el));
+        }, 2000);
+    });
+
+    const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const allCards = Array.from(document.querySelectorAll('.program-card'));
+                const index = allCards.indexOf(entry.target);
+                const rowDelay = (index % 3) * 150; 
+                setTimeout(() => { entry.target.classList.add('visible'); }, rowDelay);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    const btt = document.getElementById("backToTop");
+    window.onscroll = function() {
+        if (btt) {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                btt.style.display = "block";
+            } else {
+                btt.style.display = "none";
+            }
+        }
+    };
+    if (btt) {
+        btt.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+</script>
+</body>
+</html>

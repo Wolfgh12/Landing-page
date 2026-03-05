@@ -1,0 +1,663 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard | University of Gold Coast</title>
+    <link rel="icon" type="image/png" href="{% static '1.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --ugc-gold: #C5A059;
+            --ugc-gold-dark: #a38142;
+            --sidebar-black: #121212;
+            --ugc-charcoal: #1a1a1a;
+            --bg-light: #fdfbf7;
+            --danger-red: #d93025;
+            --ugc-blue: #002147;
+            /* Back to Top Variables */
+            --progress-color: #C5A059;
+            --progress-bg: rgba(0, 33, 71, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            display: flex;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-black);
+            height: 100vh;
+            color: white;
+            position: fixed;
+            padding-top: 20px;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        /* Close Button - Hidden on Desktop */
+        .close-sidebar {
+            display: none;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            font-size: 24px;
+            color: var(--ugc-gold);
+            cursor: pointer;
+        }
+
+        .sidebar-header img {
+            width: 110px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 5px var(--ugc-gold));
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            color: #999;
+            text-decoration: none;
+            transition: 0.3s;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.05);
+            color: var(--ugc-gold);
+            border-left: 4px solid var(--ugc-gold);
+        }
+
+        .nav-item i { margin-right: 15px; width: 20px; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-bottom: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Wolf Howling Animation */
+        .howling-wolf {
+            display: inline-block;
+            animation: howl 3s ease-in-out infinite;
+            transform-origin: bottom center;
+        }
+
+        @keyframes howl {
+            0% { transform: rotate(0deg); }
+            15% { transform: rotate(-20deg) translateY(-3px); }
+            30% { transform: rotate(-25deg) translateY(-5px); }
+            50% { transform: rotate(-25deg) translateY(-5px); }
+            70% { transform: rotate(0deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            padding: 40px;
+            box-sizing: border-box;
+            min-height: 100vh;
+            transition: 0.3s;
+        }
+
+        /* Mobile Top Bar */
+        .mobile-nav {
+            display: none;
+            background: var(--sidebar-black);
+            color: white;
+            padding: 15px 20px;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .menu-toggle {
+            font-size: 24px;
+            color: var(--ugc-gold);
+            cursor: pointer;
+        }
+
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        h1 { color: var(--ugc-charcoal); margin: 0; font-size: 28px; display: flex; align-items: center; gap: 15px; }
+        .welcome-text { color: var(--ugc-gold); font-weight: bold; margin-bottom: 5px; display: block; letter-spacing: 0.5px; }
+        
+        /* Submission Count Badge */
+        .submission-count {
+            background: var(--ugc-blue);
+            color: white;
+            padding: 4px 15px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 800;
+            box-shadow: 0 4px 10px rgba(0, 33, 71, 0.2);
+            border: 2px solid var(--ugc-gold);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 15px;
+            color: #888;
+            pointer-events: none;
+        }
+
+        .search-input {
+            padding: 12px 15px 12px 42px;
+            width: 240px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+            background: white;
+        }
+
+        .search-input:focus {
+            width: 300px;
+            border-color: var(--ugc-gold);
+            box-shadow: 0 4px 12px rgba(197, 160, 89, 0.15);
+        }
+
+        .bulk-delete-btn {
+            background: white;
+            color: var(--danger-red);
+            border: 1px solid var(--danger-red);
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: none; 
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .bulk-delete-btn:hover { background: var(--danger-red); color: white; }
+
+        .export-btn {
+            background: #1D6F42;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+        .export-btn:hover { background: #155231; transform: translateY(-2px); }
+
+        .power-btn {
+            background: var(--danger-red);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+        .power-btn:hover { background: #a51d12; transform: scale(1.05); }
+
+        /* Table Styling */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 100%;
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 800px; }
+        thead { background: var(--sidebar-black); color: var(--ugc-gold); }
+        th, td { padding: 18px 20px; border-bottom: 1px solid #eee; }
+        tr:hover { background-color: #fffdf9; }
+        
+        .row-checkbox { cursor: pointer; transform: scale(1.2); }
+        .badge { padding: 6px 14px; border-radius: 20px; font-size: 11px; background: #fff9ed; color: var(--ugc-gold-dark); font-weight: 700; border: 1px solid var(--ugc-gold); text-transform: uppercase; white-space: nowrap; }
+        .date-cell { color: #95a5a6; font-size: 13px; white-space: nowrap; }
+
+        .delete-btn {
+            background: transparent;
+            color: #ccc;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .delete-btn:hover { color: var(--danger-red); background: rgba(217, 48, 37, 0.1); }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 950;
+        }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none; justify-content: center; align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+        .modal-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            width: 90%; max-width: 400px;
+        }
+
+        #noMatchRow { display: none; }
+
+        /* BACK TO TOP STYLES */
+        .progress-wrap {
+            position: fixed;
+            right: 30px;
+            bottom: 30px;
+            height: 50px;
+            width: 50px;
+            cursor: pointer;
+            display: block;
+            border-radius: 50px;
+            box-shadow: inset 0 0 0 2px var(--progress-bg);
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(15px);
+            transition: all 200ms linear;
+            background: white;
+        }
+        .progress-wrap.active-progress {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .progress-wrap::after {
+            position: absolute;
+            content: "\f062";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            text-align: center;
+            line-height: 50px;
+            width: 50px;
+            height: 50px;
+            left: 0;
+            top: 0;
+            color: var(--ugc-blue);
+            font-size: 18px;
+            z-index: 1;
+        }
+        .progress-wrap svg path {
+            fill: none;
+        }
+        .progress-wrap svg.progress-circle path {
+            stroke: var(--progress-color);
+            stroke-width: 4;
+            box-sizing: border-box;
+            transition: all 200ms linear;
+        }
+
+        /* MOBILE RESPONSIVENESS */
+        @media (max-width: 992px) {
+            body { display: block; }
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .close-sidebar { display: block; }
+            .mobile-nav { display: flex; }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+            .header-flex {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .search-wrapper { flex-grow: 1; }
+            .search-input { width: 100%; }
+            .search-input:focus { width: 100%; }
+            .progress-wrap { right: 20px; bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="mobile-nav">
+        <div class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div style="font-weight: bold; font-size: 12px; letter-spacing: 1px; color: var(--ugc-gold);">UGC STAFF</div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="close-sidebar" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </div>
+            <img src="{% static '1.png' %}" alt="UGC Logo">
+            <div style="font-weight: bold; font-size: 13px; letter-spacing: 2px; color: var(--ugc-gold);">STAFF PORTAL</div>
+        </div>
+        <nav style="margin-top: 20px;">
+            <a href="#" class="nav-item active">
+                <i class="fas fa-th-large"></i> Submissions
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div style="padding: 20px; font-size: 11px; color: #555; text-align: center; line-height: 1.6;">
+                Developed by Nana Yaw Kwatia Awuah - 0560708067 <span class="howling-wolf">🐺</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="progress-wrap" id="backToTop">
+            <svg class="progress-circle" width="100%" height="100%" viewBox="-1 -1 102 102">
+                <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+            </svg>
+        </div>
+
+        <div class="modal-overlay" id="bulkDeleteModal">
+            <div class="modal-card">
+                <i class="fas fa-layer-group" style="color: var(--danger-red); font-size: 40px; margin-bottom: 15px;"></i>
+                <h3>Bulk Delete</h3>
+                <p id="bulkCountText">Are you sure you want to delete the selected leads?</p>
+                <div style="display: flex; gap: 10px; margin-top: 25px;">
+                    <button onclick="closeModal('bulkDeleteModal')" style="background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; flex: 1; font-weight: bold;">Cancel</button>
+                    <button onclick="executeBulkDelete()" style="background: var(--danger-red); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; flex: 1; font-weight: bold;">Yes, Delete All</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="deleteModal">
+            <div class="modal-card">
+                <i class="fas fa-trash-alt" style="color: var(--danger-red); font-size: 40px; margin-bottom: 15px;"></i>
+                <h3>Delete Submission</h3>
+                <p>This action cannot be undone. Are you sure?</p>
+                <div style="display: flex; gap: 10px; margin-top: 25px;">
+                    <button onclick="closeModal('deleteModal')" style="background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; flex: 1; font-weight: bold;">Cancel</button>
+                    <form id="deleteForm" method="post" style="flex: 1;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: var(--danger-red); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="logoutModal">
+            <div class="modal-card">
+                <i class="fas fa-exclamation-triangle" style="color: var(--danger-red); font-size: 40px; margin-bottom: 15px;"></i>
+                <h3>Confirm Logout</h3>
+                <p>Are you sure you want to end your session?</p>
+                <div style="display: flex; gap: 10px; margin-top: 25px;">
+                    <button onclick="closeModal('logoutModal')" style="background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; flex: 1; font-weight: bold;">Cancel</button>
+                    <button onclick="executeLogout()" style="background: var(--danger-red); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; flex: 1; font-weight: bold;">Yes, Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-flex">
+            <div>
+                <span class="welcome-text">WELCOME BACK, {{ user.username|upper }}</span>
+                <h1>
+                    Brochure Submissions 
+                    <span class="submission-count">{{ submissions|length }}</span>
+                </h1>
+            </div>
+            
+            <div class="header-actions">
+                <button id="bulkDeleteBtn" class="bulk-delete-btn" onclick="openBulkDeleteModal()">
+                    <i class="fas fa-trash"></i> DELETE
+                </button>
+
+                <div class="search-wrapper">
+                    <input type="text" id="tableSearch" class="search-input" placeholder="Search leads..." onkeyup="performFilter()">
+                    <i class="fas fa-search"></i>
+                </div>
+
+                <button onclick="exportToExcel()" class="export-btn">
+                    <i class="fas fa-file-excel"></i> EXPORT
+                </button>
+                
+                <button type="button" class="power-btn" onclick="openModal('logoutModal')" title="Logout">
+                    <i class="fas fa-power-off"></i>
+                </button>
+            </div>
+        </div>
+
+        <form id="bulkActionForm" method="post" action="{% url 'bulk_delete_submissions' %}">
+            {% csrf_token %}
+            <div class="table-container">
+                <table id="leadsTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></th>
+                            <th>STUDENT NAME</th>
+                            <th>CONTACT EMAIL</th>
+                            <th>MOBILE</th>
+                            <th>INTERESTED PROGRAM</th>
+                            <th>DATE</th>
+                            <th style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsBody">
+                        {% for sub in submissions %}
+                        <tr class="submission-row">
+                            <td><input type="checkbox" name="submission_ids" value="{{ sub.id }}" class="row-checkbox" onclick="toggleBulkButton()"></td>
+                            <td style="font-weight: 600; color: var(--sidebar-black);">{{ sub.full_name }}</td>
+                            <td>{{ sub.email }}</td>
+                            <td>{{ sub.mobile_number }}</td>
+                            <td><span class="badge">{{ sub.program_name }}</span></td>
+                            <td class="date-cell">
+                                <strong>{{ sub.submitted_at|date:"M d, Y" }}</strong><br>
+                                <small>{{ sub.submitted_at|date:"H:i" }}</small>
+                            </td>
+                            <td>
+                                <button type="button" class="delete-btn" onclick="confirmDelete('{{ sub.id }}')" title="Delete Lead">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr class="empty-row">
+                            <td colspan="7" style="text-align: center; padding: 80px; color: #95a5a6;">
+                                <i class="fas fa-folder-open fa-3x" style="margin-bottom: 15px; opacity: 0.3;"></i>
+                                <p>No leads found.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        
+                        <tr id="noMatchRow">
+                            <td colspan="7" style="text-align: center; padding: 60px; color: #95a5a6;">
+                                <i class="fas fa-search fa-2x" style="margin-bottom: 10px; opacity: 0.3;"></i>
+                                <p>Nothing matches from your search.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script>
+        // Sidebar Toggle Logic
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        }
+
+        function toggleAllCheckboxes(master) {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => cb.checked = master.checked);
+            toggleBulkButton();
+        }
+
+        function toggleBulkButton() {
+            const selectedCount = document.querySelectorAll('.row-checkbox:checked').length;
+            const btn = document.getElementById('bulkDeleteBtn');
+            btn.style.display = selectedCount > 0 ? 'flex' : 'none';
+        }
+
+        function openBulkDeleteModal() {
+            const count = document.querySelectorAll('.row-checkbox:checked').length;
+            document.getElementById('bulkCountText').innerText = `Are you sure you want to delete ${count} selected leads?`;
+            openModal('bulkDeleteModal');
+        }
+
+        function executeBulkDelete() {
+            document.getElementById('bulkActionForm').submit();
+        }
+
+        function performFilter() {
+            const query = document.getElementById("tableSearch").value.toLowerCase();
+            const rows = document.querySelectorAll(".submission-row");
+            const noMatchRow = document.getElementById("noMatchRow");
+            let hasVisibleRows = false;
+
+            rows.forEach(row => {
+                const rowText = row.innerText.toLowerCase();
+                if (rowText.includes(query)) {
+                    row.style.display = "";
+                    hasVisibleRows = true;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            noMatchRow.style.display = (query.length > 0 && !hasVisibleRows) ? "table-row" : "none";
+        }
+
+        function confirmDelete(submissionId) {
+            const form = document.getElementById('deleteForm');
+            form.action = `/staff/delete/${submissionId}/`; 
+            openModal('deleteModal');
+        }
+
+        function exportToExcel() {
+            const table = document.getElementById("leadsTable");
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Student Leads"});
+            XLSX.writeFile(wb, "UGC_Student_Leads.xlsx");
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function executeLogout() { 
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{% url 'logout' %}";
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = '{{ csrf_token }}';
+            form.appendChild(csrfInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // Back to Top Progress Circle Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressPath = document.querySelector('.progress-wrap path');
+            const pathLength = progressPath.getTotalLength();
+            progressPath.style.transition = progressPath.style.WebkitTransition = 'none';
+            progressPath.style.strokeDasharray = pathLength + ' ' + pathLength;
+            progressPath.style.strokeDashoffset = pathLength;
+            progressPath.getBoundingClientRect();
+            progressPath.style.transition = progressPath.style.WebkitTransition = 'stroke-dashoffset 10ms linear';
+            
+            const updateProgress = function () {
+                const scroll = window.pageYOffset || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const progress = pathLength - (scroll * pathLength / height);
+                progressPath.style.strokeDashoffset = progress;
+            }
+            updateProgress();
+            window.addEventListener('scroll', updateProgress);
+            
+            const offset = 50;
+            const progressWrap = document.querySelector('.progress-wrap');
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > offset) {
+                    progressWrap.classList.add('active-progress');
+                } else {
+                    progressWrap.classList.remove('active-progress');
+                }
+            });
+            
+            progressWrap.addEventListener('click', function(event) {
+                event.preventDefault();
+                window.scrollTo({top: 0, behavior: 'smooth'});
+                return false;
+            });
+        });
+    </script>
+</body>
+</html>
