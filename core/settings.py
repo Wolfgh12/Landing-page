@@ -1,7 +1,8 @@
 """
 Django settings for core project.
 """
-
+from dotenv import load_dotenv
+load_dotenv()
 import os
 from pathlib import Path
 
@@ -13,12 +14,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$w@af*dkx@ba59h*n)92bru(uwkmr7*__1t%#p*d7gwej7tww3'
+# Update: Using environment variable to clear W009
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-$w@af*dkx@ba59h*n)92bru(uwkmr7*__1t%#p*d7gwej7tww3')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Update: Using environment variable to clear W018
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+# Update: Added local and placeholder domain to clear W020
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.herokuapp.com', '.railway.app']
 
 
 # Application definition
@@ -35,6 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Added for production static file handling
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -48,7 +53,6 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # DIRS tells Django where to look for your global templates folder
         'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -112,6 +116,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles' # Added for deployment
 
 # --- MEDIA FILE CONFIGURATION ---
 # This is where Django will store your uploaded program images
@@ -138,3 +143,13 @@ LOGIN_REDIRECT_URL = 'staff_dashboard'
 
 # Where the user goes after logging out
 LOGOUT_REDIRECT_URL = 'login'
+
+# --- PRODUCTION SECURITY SETTINGS ---
+# Clears W004, W008, W012, W016 when DEBUG is False
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

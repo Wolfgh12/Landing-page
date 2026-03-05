@@ -1,8 +1,12 @@
+# Secrets
+.env
+
 # Django
 *.pyc
 __pycache__/
 db.sqlite3
-.env
+
+# Media and Static
 media/
 static/
 staticfiles/
