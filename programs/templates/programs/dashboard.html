@@ -15,6 +15,7 @@
             --ugc-charcoal: #1a1a1a;
             --bg-light: #fdfbf7;
             --danger-red: #d93025;
+            --success-green: #1D6F42;
             --ugc-blue: #002147;
             /* Back to Top Variables */
             --progress-color: #C5A059;
@@ -118,6 +119,28 @@
             box-sizing: border-box;
             min-height: 100vh;
             transition: 0.3s;
+        }
+
+        /* Messaging/Alerts */
+        .messages-container {
+            margin-bottom: 20px;
+        }
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            animation: slideDown 0.4s ease-out;
+        }
+        .alert-success { background: #e6f4ea; color: var(--success-green); border: 1px solid #ceead6; }
+        .alert-error { background: #fce8e6; color: var(--danger-red); border: 1px solid #fad2cf; }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         /* Mobile Top Bar */
@@ -416,6 +439,17 @@
     </div>
 
     <div class="main-content">
+        <div class="messages-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                        <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
         <div class="progress-wrap" id="backToTop">
             <svg class="progress-circle" width="100%" height="100%" viewBox="-1 -1 102 102">
                 <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
@@ -597,7 +631,7 @@
 
         function confirmDelete(submissionId) {
             const form = document.getElementById('deleteForm');
-            form.action = `/staff/delete/${submissionId}/`; 
+            form.action = "/staff/delete/" + submissionId + "/"; 
             openModal('deleteModal');
         }
 
@@ -623,8 +657,18 @@
             form.submit();
         }
 
-        // Back to Top Progress Circle Logic
+        // Auto-dismiss alerts after 5 seconds
         document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    alert.style.transition = 'opacity 0.5s ease';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 5000);
+
+            // Back to Top Progress Circle Logic
             const progressPath = document.querySelector('.progress-wrap path');
             const pathLength = progressPath.getTotalLength();
             progressPath.style.transition = progressPath.style.WebkitTransition = 'none';
